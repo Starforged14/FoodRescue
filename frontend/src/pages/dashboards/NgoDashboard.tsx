@@ -95,9 +95,9 @@ export function NgoDashboard() {
           params: { page: 0, size: 20, sort: 'createdAt,desc' },
         }),
       ])
-      const nextOrganizations = organizationResponse.data
+      const nextOrganizations = organizationResponse.data ?? []
       setOrganizations(nextOrganizations)
-      setListings(listingResponse.data.content)
+      setListings(listingResponse.data?.content ?? [])
       const currentSelection = nextOrganizations.find(
         (organization) => organization.id === organizationIdRef.current,
       )

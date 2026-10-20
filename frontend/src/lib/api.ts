@@ -1,7 +1,9 @@
-import axios, { type InternalAxiosRequestConfig } from 'axios'
+import axios, { type AxiosRequestConfig } from 'axios'
 import { clearAuthSession, readAuthSession } from './auth-storage'
-import type { ApiErrorResponse } from '../types/auth'
 import {
+  mockAdminMetrics,
+  mockAdminPendingMemberships,
+  mockAdminPendingOrganizations,
   mockClaims,
   mockDeliveryTasks,
   mockDonorProfile,
@@ -9,15 +11,15 @@ import {
   mockNgoOrganization,
   mockVolunteerProfile,
 } from './demo-data'
+import type { ApiErrorResponse } from '../types/auth'
 
 export const unauthorizedEvent = 'foodrescue:unauthorized'
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api/v1',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 15_000,
 })
 
 api.interceptors.request.use((config) => {
@@ -28,26 +30,24 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-function getMockResponse(config: InternalAxiosRequestConfig) {
+function getMockResponse(config: AxiosRequestConfig): { data: unknown; status: number } | null {
   const url = config.url || ''
-  const isGet = (config.method || 'get').toLowerCase() === 'get'
+  const method = (config.method || 'GET').toUpperCase()
+  const isGet = method === 'GET'
 
+  // Auth Mocks
   if (url.includes('/auth/login') || url.includes('/auth/register')) {
-    let email = 'demo-user@foodrescue.org'
-    let role: string = 'DONOR'
-    try {
-      if (typeof config.data === 'string') {
-        const body = JSON.parse(config.data)
-        if (body.email) email = body.email
-        if (body.role) role = body.role
-      } else if (config.data && typeof config.data === 'object') {
-        if (config.data.email) email = config.data.email
-        if (config.data.role) role = config.data.role
+    let email = 'donor@bistro.com'
+    if (config.data) {
+      try {
+        const body = typeof config.data === 'string' ? JSON.parse(config.data) : config.data
+        if (body.email) email = body.email.toLowerCase()
+      } catch {
+        // use default
       }
-    } catch {
-      // ignore json parse error
     }
 
+    let role: 'DONOR' | 'NGO' | 'VOLUNTEER' | 'ADMIN' = 'DONOR'
     if (email.includes('shelter') || email.includes('ngo')) {
       role = 'NGO'
     } else if (email.includes('volunteer') || email.includes('courier')) {
@@ -69,6 +69,7 @@ function getMockResponse(config: InternalAxiosRequestConfig) {
     }
   }
 
+  // Donor Endpoints
   if (url.includes('/donor/profile')) {
     return { data: mockDonorProfile, status: 200 }
   }
@@ -84,10 +85,24 @@ function getMockResponse(config: InternalAxiosRequestConfig) {
       status: 200,
     }
   }
-  if (url.includes('/ngo/organizations')) {
+  if (url.includes('/donor/deliveries')) {
+    return {
+      data: {
+        content: mockDeliveryTasks,
+        totalElements: mockDeliveryTasks.length,
+        totalPages: 1,
+        number: 0,
+        size: 20,
+      },
+      status: 200,
+    }
+  }
+
+  // NGO Endpoints
+  if (url.includes('/ngo/organizations/mine') || url.includes('/ngo/organizations')) {
     return { data: [mockNgoOrganization], status: 200 }
   }
-  if (url.includes('/ngo/listings/available')) {
+  if (url.includes('/ngo/listings')) {
     return {
       data: {
         content: mockListings,
@@ -99,7 +114,7 @@ function getMockResponse(config: InternalAxiosRequestConfig) {
       status: 200,
     }
   }
-  if (url.includes('/ngo/claims')) {
+  if (url.includes('/claims')) {
     return {
       data: {
         content: mockClaims,
@@ -111,6 +126,20 @@ function getMockResponse(config: InternalAxiosRequestConfig) {
       status: 200,
     }
   }
+  if (url.includes('/deliveries') && url.includes('/ngo/')) {
+    return {
+      data: {
+        content: mockDeliveryTasks,
+        totalElements: mockDeliveryTasks.length,
+        totalPages: 1,
+        number: 0,
+        size: 20,
+      },
+      status: 200,
+    }
+  }
+
+  // Volunteer Endpoints
   if (url.includes('/volunteer/profile')) {
     return { data: mockVolunteerProfile, status: 200 }
   }
@@ -126,32 +155,40 @@ function getMockResponse(config: InternalAxiosRequestConfig) {
       status: 200,
     }
   }
-  if (url.includes('/admin/')) {
+  if (url.includes('/volunteer/deliveries/')) {
+    return { data: mockDeliveryTasks[0], status: 200 }
+  }
+
+  // Admin Endpoints
+  if (url.includes('/admin/dashboard/metrics')) {
+    return { data: mockAdminMetrics, status: 200 }
+  }
+  if (url.includes('/admin/organizations/pending')) {
     return {
       data: {
-        metrics: {
-          totalUsers: 142,
-          totalDonors: 38,
-          totalNgos: 24,
-          totalVolunteers: 80,
-          totalListings: 312,
-          completedDeliveries: 289,
-        },
-        pendingOrganizations: [
-          {
-            id: 'mock-pending-org',
-            name: 'Eastside Food Pantry',
-            contactEmail: 'pantry@eastside.org',
-            verificationStatus: 'PENDING_REVIEW',
-            registrationNumber: 'NGO-10928',
-          },
-        ],
+        content: mockAdminPendingOrganizations,
+        totalElements: mockAdminPendingOrganizations.length,
+        totalPages: 1,
+        number: 0,
+        size: 20,
+      },
+      status: 200,
+    }
+  }
+  if (url.includes('/admin/memberships/pending')) {
+    return {
+      data: {
+        content: mockAdminPendingMemberships,
+        totalElements: mockAdminPendingMemberships.length,
+        totalPages: 1,
+        number: 0,
+        size: 20,
       },
       status: 200,
     }
   }
 
-  // Default fallback for actions / POST
+  // Default fallback for actions / mutations (POST, PUT, DELETE)
   if (!isGet) {
     return { data: { success: true }, status: 200 }
   }
@@ -179,15 +216,10 @@ api.interceptors.response.use(
       if (isGatewayOrConnError && error.config) {
         const mock = getMockResponse(error.config)
         if (mock) {
-          return Promise.resolve({
-            data: mock.data,
-            status: mock.status,
-            statusText: 'OK (Demo Mode)',
-            headers: {},
-            config: error.config,
-          })
+          return Promise.resolve(mock)
         }
       }
+      return Promise.reject(error)
     }
     return Promise.reject(error)
   },

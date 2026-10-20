@@ -49,10 +49,10 @@ export function VolunteerDashboard() {
     })
     const openRequest = api.get<Page<DeliveryTaskSummary>>('/volunteer/deliveries/open', {
       params: { page: 0, size: 20, sort: 'pickupWindowStart,asc' },
-    }).then((response) => setOpenTasks(response.data.content))
+    }).then((response) => setOpenTasks(response.data?.content ?? []))
     const mineRequest = api.get<Page<DeliveryTaskSummary>>('/volunteer/deliveries/mine', {
       params: { page: 0, size: 20, sort: 'createdAt,desc' },
-    }).then((response) => setMyTasks(response.data.content))
+    }).then((response) => setMyTasks(response.data?.content ?? []))
 
     try {
       await Promise.all([profileRequest, openRequest, mineRequest])

@@ -148,10 +148,10 @@ export function DonorDashboard() {
     })
     const listingsRequest = api.get<Page<FoodListing>>('/donor/listings', {
       params: { page: 0, size: 20, sort: 'createdAt,desc' },
-    }).then((response) => setListings(response.data.content))
+    }).then((response) => setListings(response.data?.content ?? []))
     const deliveriesRequest = api.get<Page<DeliveryTask>>('/donor/deliveries', {
       params: { page: 0, size: 20, sort: 'createdAt,desc' },
-    }).then((response) => setDeliveries(response.data.content))
+    }).then((response) => setDeliveries(response.data?.content ?? []))
 
     try {
       await Promise.all([profileRequest, listingsRequest, deliveriesRequest])

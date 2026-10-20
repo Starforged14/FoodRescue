@@ -1,4 +1,7 @@
 import type {
+  AdminDashboardMetrics,
+  AdminNgoMembership,
+  AdminNgoOrganization,
   DeliveryTask,
   DonorProfile,
   FoodClaim,
@@ -27,6 +30,7 @@ export const mockListings: FoodListing[] = [
     status: 'AVAILABLE',
     donorOrganizationName: 'Green Table Bistro',
     pickupCity: 'Portland',
+    pickupRegion: 'OR',
     pickupCountryCode: 'US',
     pickupInstructions: 'Pick up at the rear kitchen entrance. Ring bell #3.',
     availableUntil: new Date(Date.now() + 86400000).toISOString(),
@@ -58,6 +62,7 @@ export const mockListings: FoodListing[] = [
     status: 'AVAILABLE',
     donorOrganizationName: 'Sunrise Bakery',
     pickupCity: 'Portland',
+    pickupRegion: 'OR',
     pickupCountryCode: 'US',
     pickupInstructions: 'Front counter with staff member on duty.',
     availableUntil: new Date(Date.now() + 86400000).toISOString(),
@@ -96,7 +101,12 @@ export const mockVolunteerProfile: VolunteerProfile = {
   maxTravelDistanceKm: 25,
 }
 
-export const mockDeliveryTasks: DeliveryTask[] = [
+export const mockDeliveryTasks: (DeliveryTask & {
+  pickupCity: string
+  pickupRegion?: string
+  dropoffCity: string
+  dropoffRegion?: string
+})[] = [
   {
     id: 'mock-task-1',
     claimId: 'mock-claim-1',
@@ -104,6 +114,10 @@ export const mockDeliveryTasks: DeliveryTask[] = [
     status: 'OPEN',
     pickupWindowStart: new Date(Date.now() + 3600000).toISOString(),
     pickupWindowEnd: new Date(Date.now() + 18000000).toISOString(),
+    pickupCity: 'Portland',
+    pickupRegion: 'OR',
+    dropoffCity: 'Portland',
+    dropoffRegion: 'OR',
     pickupAddress: {
       addressLine1: '124 Market Street',
       city: 'Portland',
@@ -132,5 +146,66 @@ export const mockClaims: FoodClaim[] = [
     status: 'ACTIVE',
     fulfillmentMode: 'VOLUNTEER_DELIVERY',
     claimedAt: new Date(Date.now() - 1800000).toISOString(),
+  },
+]
+
+export const mockAdminMetrics: AdminDashboardMetrics = {
+  totalUsers: 142,
+  usersByRole: {
+    DONOR: 38,
+    NGO: 24,
+    VOLUNTEER: 78,
+    ADMIN: 2,
+  },
+  listingsByStatus: {
+    AVAILABLE: 18,
+    CLAIMED: 12,
+    COMPLETED: 240,
+    EXPIRED: 42,
+  },
+  claimsByStatus: {
+    ACTIVE: 12,
+    COMPLETED: 240,
+    CANCELLED: 15,
+  },
+  deliveriesByStatus: {
+    OPEN: 5,
+    ASSIGNED: 7,
+    PICKED_UP: 3,
+    DELIVERED: 220,
+    FAILED: 5,
+  },
+  pendingNgoOrganizations: 1,
+  pendingNgoMemberships: 1,
+}
+
+export const mockAdminPendingOrganizations: AdminNgoOrganization[] = [
+  {
+    id: 'mock-pending-org-1',
+    name: 'Eastside Food Pantry',
+    contactEmail: 'pantry@eastside.org',
+    contactPhone: '+1-555-0144',
+    addressLine1: '404 Grand Avenue',
+    city: 'Portland',
+    region: 'OR',
+    postalCode: '97214',
+    countryCode: 'US',
+    verificationStatus: 'PENDING_REVIEW',
+    registrationNumber: 'NGO-10928',
+    createdAt: new Date(Date.now() - 172800000).toISOString(),
+  },
+]
+
+export const mockAdminPendingMemberships: AdminNgoMembership[] = [
+  {
+    id: 'mock-pending-mem-1',
+    organizationId: 'mock-pending-org-1',
+    organizationName: 'Eastside Food Pantry',
+    userId: 'mock-user-456',
+    userEmail: 'julia.santos@eastside.org',
+    firstName: 'Julia',
+    lastName: 'Santos',
+    status: 'PENDING',
+    createdAt: new Date(Date.now() - 86400000).toISOString(),
   },
 ]

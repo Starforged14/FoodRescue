@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const newSession = await login(credentials)
       setSession(saveAuthSession(newSession))
-    } catch (error) {
+    } catch {
       // If backend is unavailable (e.g. 502 Bad Gateway / Network Error during local presentation),
       // create a mock session so the presenter can demonstrate all role dashboards seamlessly
       const targetRoles: AppRole[] = fallbackRoles && fallbackRoles.length > 0 ? fallbackRoles : ['DONOR']

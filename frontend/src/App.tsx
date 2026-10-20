@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useAuth } from './context/useAuth'
 import { Brand } from './components/Brand'
 import { DemoSwitcher } from './components/DemoSwitcher'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { AuthPage } from './pages/AuthPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { HomePage } from './pages/HomePage'
@@ -69,20 +70,22 @@ function SiteLayout() {
         </div>
       </header>
 
-      <Routes>
-        <Route element={<HomePage />} path="/" />
-        <Route element={<AuthPage mode="login" />} path="/login" />
-        <Route element={<AuthPage mode="register" />} path="/register" />
-        <Route
-          element={
-            <RequireAuth>
-              <DashboardPage />
-            </RequireAuth>
-          }
-          path="/dashboard"
-        />
-        <Route element={<Navigate replace to="/" />} path="*" />
-      </Routes>
+      <ErrorBoundary>
+        <Routes>
+          <Route element={<HomePage />} path="/" />
+          <Route element={<AuthPage mode="login" />} path="/login" />
+          <Route element={<AuthPage mode="register" />} path="/register" />
+          <Route
+            element={
+              <RequireAuth>
+                <DashboardPage />
+              </RequireAuth>
+            }
+            path="/dashboard"
+          />
+          <Route element={<Navigate replace to="/" />} path="*" />
+        </Routes>
+      </ErrorBoundary>
 
       <DemoSwitcher />
 

@@ -152,12 +152,12 @@ export function DemoSwitcher() {
                     key={account.role}
                     type="button"
                     onClick={() => handleSwitch(account)}
-                    disabled={Boolean(loadingRole)}
+                    disabled={loadingRole !== null}
                     className={`flex items-center gap-2.5 rounded-xl border p-2 text-left text-xs font-semibold transition-all ${
                       isCurrent
                         ? 'border-emerald-600 bg-emerald-50/70 text-emerald-950 ring-1 ring-emerald-500'
                         : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 text-gray-800'
-                    } ${Boolean(loadingRole) ? 'opacity-60 cursor-not-allowed' : 'active:scale-98'}`}
+                    } ${loadingRole ? 'opacity-60 cursor-not-allowed' : 'active:scale-98'}`}
                   >
                     <span className="text-lg">{account.emoji}</span>
                     <div className="min-w-0 flex-1">

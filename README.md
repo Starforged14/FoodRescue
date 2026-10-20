@@ -31,10 +31,10 @@ Generate a suitable secret locally with `openssl rand -base64 32`; do not commit
 The JWT secret is required at startup and must be Base64-encoded. `JWT_EXPIRATION` accepts a
 Java duration value and defaults to one hour.
 
-Hibernate schema management is intentionally set to `validate`; it does not create tables.
-The database must already have the FoodRescue schema before starting the backend. This
-repository does not currently include database migration scripts, so creating an empty
-database alone is not sufficient to initialize a new installation.
+Hibernate schema management is set to `validate` in standard mode; execute the provided
+`src/main/resources/schema.sql` script in your PostgreSQL database to create all required tables and indexes.
+Alternatively, start the backend with `--spring.profiles.active=demo` to automatically create/update tables
+and seed initial test accounts for all 4 roles (Donor, NGO, Volunteer, Admin).
 
 The application listens on port `8080` by default. Set `SERVER_PORT` to override it.
 

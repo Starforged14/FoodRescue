@@ -38,8 +38,8 @@ export function AdminDashboard() {
         }),
       ])
       setMetrics(metricsResponse.data)
-      setOrganizations(organizationsResponse.data.content)
-      setMemberships(membershipsResponse.data.content)
+      setOrganizations(organizationsResponse.data?.content ?? [])
+      setMemberships(membershipsResponse.data?.content ?? [])
     } catch (requestError) {
       setError(getErrorMessage(requestError))
     } finally {
